@@ -1,29 +1,9 @@
 #!/usr/bin/env bash
 
-# rofi-volume
-# Quick PipeWire volume mixer for Rofi
-#
-# Features:
-#   - System volume
-#   - Per-application volume
-#   - Mute / Unmute
-#   - Output device switching
-#   - Volume input through Rofi
-#
-# Dependencies:
-#   rofi-wayland
-#   wireplumber / wpctl
-#
-# PipeWire only for now.
-
 set -u
 
 ROFI="${ROFI:-rofi}"
 WPCTL="${WPCTL:-wpctl}"
-
-# ─────────────────────────────────────────────
-# Helpers
-# ─────────────────────────────────────────────
 
 get_volume() {
     local id="$1"
@@ -55,9 +35,9 @@ volume_label() {
     volume="$(get_volume "$id")"
 
     if is_muted "$id"; then
-        printf '🔇 %s%% (Muted)' "$volume"
+        printf '    %s%% (Muted)' "$volume"
     else
-        printf '🔊 %s%%' "$volume"
+        printf '    %s%%' "$volume"
     fi
 }
 
@@ -81,10 +61,6 @@ set_volume() {
 
     "$WPCTL" set-volume "$id" "${value}%"
 }
-
-# ─────────────────────────────────────────────
-# Volume editor
-# ─────────────────────────────────────────────
 
 edit_volume() {
     local id="$1"
@@ -114,10 +90,6 @@ edit_volume() {
     fi
 }
 
-# ─────────────────────────────────────────────
-# Node information
-# ─────────────────────────────────────────────
-
 get_prop() {
     local id="$1"
     local property="$2"
@@ -143,10 +115,6 @@ get_node_name() {
     printf '%s' "$name"
 }
 
-# ─────────────────────────────────────────────
-# Default sink
-# ─────────────────────────────────────────────
-
 get_default_sink() {
     "$WPCTL" status |
         awk '
@@ -169,10 +137,6 @@ get_default_sink() {
             }
         '
 }
-
-# ─────────────────────────────────────────────
-# Output devices
-# ─────────────────────────────────────────────
 
 list_output_devices() {
     "$WPCTL" status |
@@ -206,10 +170,6 @@ list_output_devices() {
         '
 }
 
-# ─────────────────────────────────────────────
-# Output device selector
-# ─────────────────────────────────────────────
-
 output_devices() {
     while true; do
         local labels=()
@@ -218,18 +178,18 @@ output_devices() {
         while IFS=$'\t' read -r id name; do
             [[ "$id" =~ ^[0-9]+$ ]] || continue
 
-            local icon="🔊"
+            local icon="   "
 
             if [[ "$name" =~ [Bb]luetooth|[Hh]eadset|[Hh]eadphones|[Ee]arbuds ]]; then
-                icon="🎧"
+                icon="🎧   "
             elif [[ "$name" =~ HDMI|DisplayPort ]]; then
-                icon="🖥️"
+                icon="   "
             fi
 
             local marker=""
 
             if [[ "$id" == "$(get_default_sink)" ]]; then
-                marker="  ✓"
+                marker="   ✓"
             fi
 
             labels+=("$icon $name$marker")
@@ -243,8 +203,7 @@ output_devices() {
             return
         fi
 
-        # Thêm nút Back vào cuối danh sách
-        labels+=("↩️ Back")
+        labels+=("    Back")
 
         local selected
 
@@ -262,7 +221,6 @@ output_devices() {
 
         local index="$selected"
 
-        # Nếu chọn Back (index cuối cùng)
         if ((index == ${#labels[@]} - 1)); then
             return
         fi
@@ -272,10 +230,6 @@ output_devices() {
         "$WPCTL" set-default "${ids[$index]}" >/dev/null 2>&1
     done
 }
-
-# ─────────────────────────────────────────────
-# Application streams
-# ─────────────────────────────────────────────
 
 list_playback_streams() {
     "$WPCTL" status |
@@ -311,27 +265,21 @@ list_playback_streams() {
         '
 }
 
-# ─────────────────────────────────────────────
-# Playback list
-# ─────────────────────────────────────────────
-
 build_playback_list() {
     local default_sink
 
     default_sink="$(get_default_sink)"
 
-    # System volume
     if [[ -n "$default_sink" ]]; then
         local system_volume
 
         system_volume="$(volume_label "$default_sink")"
 
         printf '%s\t%s\n' \
-            "🔊 System Sounds  $system_volume" \
+            "System Sounds  $system_volume" \
             "$default_sink"
     fi
 
-    # Applications
     while IFS=$'\t' read -r id name; do
         [[ "$id" =~ ^[0-9]+$ ]] || continue
 
@@ -352,15 +300,11 @@ build_playback_list() {
         volume="$(volume_label "$id")"
 
         printf '%s\t%s\n' \
-            "🎵 $name  $volume" \
+            "$name  $volume" \
             "$id"
 
     done < <(list_playback_streams)
 }
-
-# ─────────────────────────────────────────────
-# Playback action menu
-# ─────────────────────────────────────────────
 
 playback_actions() {
     local id="$1"
@@ -374,9 +318,9 @@ playback_actions() {
         local mute_action
 
         if is_muted "$id"; then
-            mute_action="🔊 Unmute"
+            mute_action="    Unmute"
         else
-            mute_action="🔇 Mute"
+            mute_action="    Mute"
         fi
 
         local selected
@@ -385,7 +329,7 @@ playback_actions() {
             printf '%s\n' \
                 "Volume: $volume" \
                 "$mute_action" \
-                "↩️ Back" |
+                "    Back" |
                 "$ROFI" \
                     -dmenu \
                     -i \
@@ -410,10 +354,6 @@ playback_actions() {
     done
 }
 
-# ─────────────────────────────────────────────
-# Playback menu
-# ─────────────────────────────────────────────
-
 playback_menu() {
     while true; do
         local labels=()
@@ -433,8 +373,7 @@ playback_menu() {
             return
         fi
 
-        # Thêm nút Back vào cuối danh sách
-        labels+=("↩️ Back")
+        labels+=("    Back")
 
         local selected
 
@@ -452,7 +391,6 @@ playback_menu() {
 
         local index="$selected"
 
-        # Nếu chọn Back (index cuối cùng)
         if ((index == ${#labels[@]} - 1)); then
             return
         fi
@@ -465,10 +403,6 @@ playback_menu() {
     done
 }
 
-# ─────────────────────────────────────────────
-# Main
-# ─────────────────────────────────────────────
-
 main() {
     while true; do
 
@@ -476,8 +410,8 @@ main() {
 
         selected="$(
             printf '%s\n' \
-                "▶ Playback" \
-                "🔊 Output Devices" |
+                "▶  Playback" \
+                "    Output Devices" |
                 "$ROFI" \
                     -dmenu \
                     -i \
