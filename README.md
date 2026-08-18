@@ -16,7 +16,7 @@ git clone https://github.com/FrostShelter/rofi-audio-sink.git
 cd rofi-audio-sink
 sudo install -Dm755 rofi-audio-sink.sh /usr/local/bin/rofi-sink
 cd ~
-rm -rf ~/rofi-mako-notify
+rm -rf ~/rofi-audio-sink
 
 ```
 ## Usage
