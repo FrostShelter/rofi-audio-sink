@@ -8,7 +8,7 @@ A lightweight PipeWire volume mixer and manager for [Rofi](https://github.com/da
 * `wireplumber`
 ## Attentive
 
-Please don't disable the rofi search bar (input bar) in the config.
+Please don't disable the rofi search bar (input bar) in the rofi config.
 
 ## Installation
 
