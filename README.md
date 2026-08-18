@@ -44,4 +44,4 @@ Thanks for the inspiration!
 * [networkmanager-dmenu](https://github.com/firecat53/networkmanager-dmenu)
 * [pavucontrol](https://github.com/pulseaudio/pavucontrol)
 
-These projects inspired the idea of building lightweight, Rofi-based utilities for interacting with the Linux desktop.
+These projects inspired the design and concept of building lightweight, Rofi-based utilities for interacting with the Linux desktop.
