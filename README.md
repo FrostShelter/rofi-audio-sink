@@ -1,7 +1,5 @@
 # rofi-audio-sink
 
-# rofi-mako-notify
-
 A lightweight PipeWire volume mixer and manager for [Rofi](https://github.com/davatorium/rofi).
 
 ## Dependencies
